@@ -3,14 +3,14 @@ import os
 import sys
 from shutil import rmtree
 
-from setuptools import find_packages, setup, Command
+from setuptools import setup, Command
 
 NAME = "toplevel"
 DESCRIPTION = "Validate toplevel imports against requirements.txt"
 URL = "https://github.com/ohjeah/toplevel"
 EMAIL = "info@markusqua.de"
 AUTHOR = "Markus Quade"
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -59,7 +59,7 @@ setup(
     author=AUTHOR,
     author_email=EMAIL,
     url=URL,
-    packages=find_packages(),
+    py_modules=["toplevel"],
     install_requires=REQUIRED,
     license="MIT",
     classifiers=[

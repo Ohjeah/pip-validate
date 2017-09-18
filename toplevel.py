@@ -107,7 +107,8 @@ def main():
 
 
     if args.req is not None:
-        req = [str(r.req) for r in parse_requirements(args.req, session="hack")]
+        req = [r.req.name for r in parse_requirements(args.req, session="hack")]
+        print(req)
         all_valid = validate_imports(imports, req)
         if all_valid:
             msg = "All imports of {} are listed in {}".format(args.dir or args.file, args.req)
