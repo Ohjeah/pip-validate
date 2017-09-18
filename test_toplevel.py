@@ -1,3 +1,4 @@
+import os
 import subprocess
 
 import pytest
@@ -52,5 +53,20 @@ def test_collect_extern_file_imports():
     assert set(collect_extern_file_imports(NAME + ".py")) == set(["pip", "crayons"])
 
 
-def test_end_to_end():
+def test_collect_dir_imports():
+    imports = collect_dir_imports(os.path.dirname(__file__))
+    for k, v in imports.items():
+        if "setup.py" in k:
+            assert v == ["setuptools"]
+        elif "test_toplevel.py" in k:
+            assert v == ["pytest"]
+        else:
+            assert set(v) == set(["pip", "crayons"])
+
+def test_end_to_end_file():
     assert subprocess.call("python toplevel.py --file toplevel.py --req requirements.txt", shell=True) == 0
+
+
+def test_end_to_end_dir():
+    # dev requirements are missing and this file imports pytest
+    assert subprocess.call("python toplevel.py --dir . --req requirements.txt", shell=True) == 1

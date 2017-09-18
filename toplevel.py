@@ -78,7 +78,6 @@ def is_std_lib(module_name):
         return True
 
     module_path = _get_module_path(module_name)
-    print(module_path, module_name)
     if "site-packages" in module_path:
         return False
     return "python" in module_path or "lib" in module_path
