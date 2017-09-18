@@ -32,7 +32,6 @@ def clean_line(line):
 def ignore_docstrings_and_comments(lines):
     """Only look at the acutal code when searching for imports"""
     marker = None
-    skip = False
     for line in lines:
 
         if marker is None:
