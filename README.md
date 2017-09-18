@@ -1,4 +1,4 @@
-**Validate toplevel imports against requirements.txt**
+**toplevel**
 ---
 ![](https://travis-ci.org/Ohjeah/toplevel.svg)
 
