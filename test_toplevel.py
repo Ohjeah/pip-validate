@@ -7,13 +7,13 @@ from toplevel import *
 NAME = __file__.split("/")[-1].split(".")[0].split("_")[-1]
 
 is_import_test_lines = [
-( "from .a import b", True),
-( "from a import b", True),
-( "import a as b", True),
-( "import a.b", True),
-( "is_import(a)", False),
-( "def is_import(line):", False),
-( "  # import a", False)
+    ("from .a import b", True),
+    ("from a import b", True),
+    ("import a as b", True),
+    ("import a.b", True),
+    ("is_import(a)", False),
+    ("def is_import(line):", False),
+    ('"All imports of {} are listed in {}".format(args.dir or args.file, args.req)', False)
 ]
 
 
@@ -39,16 +39,17 @@ def test_is_std_lib():
     assert is_std_lib("sys")
     assert is_std_lib("os")
     assert not is_std_lib("apps")
+    assert not is_std_lib("")
 
 
-def test_ignore_docstrings():
-    text = ["abc", '"""', "comment", '"""', "def"]
-    text_wo_doc = ["abc", "def"]
-    assert text_wo_doc == list(ignore_docstrings(text))
+def test_ignore_docstrings_and_comments():
+    text = ["abc", 'e"""', "'''docstring1", "docstring2", '"""', "#comment", "def"]
+    text_wo_doc = ["abc", 'e', "def"]
+    assert text_wo_doc == list(ignore_docstrings_and_comments(text))
 
 # self-test
-def collect_extern_file_imports():
-    assert collect_extern_file_imports(NAME) == ["pip"]
+def test_collect_extern_file_imports():
+    assert set(collect_extern_file_imports(NAME + ".py")) == set(["pip", "crayons"])
 
 
 def test_end_to_end():

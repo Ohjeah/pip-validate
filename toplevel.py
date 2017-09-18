@@ -11,8 +11,11 @@ from pip.req import parse_requirements
 
 def is_import(line):
     """Does this line use the import keyword"""
-    pattern = r"[ \t]*import[ \t]+|[ \t]+import[ \t]*"
-    return not line.strip().startswith("#") and bool(re.findall(pattern, line))
+    pattern = r"[ \t]*import[ \t]+|[ \t]+import[ \t]+"
+    for token in ["'", '"']: # do we use import in a string
+        if token in line:
+            return False
+    return bool(re.findall(pattern, line))
 
 
 def clean_line(line):
@@ -26,18 +29,34 @@ def clean_line(line):
         return module.strip()
 
 
-def ignore_docstrings(lines):
-    in_docstring = False
+def ignore_docstrings_and_comments(lines):
+    """Only look at the acutal code when searching for imports"""
+    marker = None
+    skip = False
     for line in lines:
-        found_marker = '"""' in line or "'''" in line
-        if not in_docstring and not found_marker:
-            yield line
-        in_docstring = in_docstring != found_marker
+
+        if marker is None:
+            if not line.strip().startswith("#"):
+                # remove a trailing docstring
+                l = line.split("'''")[0].split('"""')[0].split('#')[0]
+                if l:
+                    yield l
+
+        if marker is None:
+            if '"""' in line:
+                marker = '"""'
+            elif "'''" in line:
+                marker = "'''"
+
+        elif marker in line:
+            marker = None
 
 
 def find_toplevel_imports(filename):
     with open(filename, "r") as f:
-        imports = (clean_line(line) for line in ignore_docstrings(f.readlines()) if is_import(line))
+        imports = (clean_line(line) for line in
+                   ignore_docstrings_and_comments(f.readlines())
+                   if is_import(line))
     return set(filter(bool, imports))
 
 
@@ -59,9 +78,10 @@ def is_std_lib(module_name):
         return True
 
     module_path = _get_module_path(module_name)
-    if 'site-packages' in module_path:
+    print(module_path, module_name)
+    if "site-packages" in module_path:
         return False
-    return 'python' in module_path
+    return "python" in module_path or "lib" in module_path
 
 
 def is_in_cwd(module_name):
@@ -103,11 +123,12 @@ def main():
     if args.file is not None:
         imports = set(collect_extern_file_imports(args.file))
     else:
-        imports = set(itertools.chain.from_iterable(collect_dir_imports(args.dir).values()))
-
+        imports = set(itertools.chain.from_iterable(
+                        collect_dir_imports(args.dir).values()))
 
     if args.req is not None:
-        req = [r.req.name for r in parse_requirements(args.req, session="hack")]
+        req = [r.req.name for r in
+               parse_requirements(args.req, session="hack")]
         all_valid = validate_imports(imports, req)
         if all_valid:
             msg = "All imports of {} are listed in {}".format(args.dir or args.file, args.req)
@@ -115,6 +136,7 @@ def main():
             sys.exit(0)
         else:
             sys.exit(1)
+
 
 if __name__ == '__main__':
     main()
