@@ -35,13 +35,10 @@ def ignore_docstrings_and_comments(lines):
     for line in lines:
 
         if marker is None:
-            if not line.strip().startswith("#"):
-                # remove a trailing docstring
-                l = line.split("'''")[0].split('"""')[0].split('#')[0]
-                if l:
-                    yield l
+            l = line.split("'''")[0].split('"""')[0].split('#')[0]
+            if l:
+                yield l
 
-        if marker is None:
             if '"""' in line:
                 marker = '"""'
             elif "'''" in line:
