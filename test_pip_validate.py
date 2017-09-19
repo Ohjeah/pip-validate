@@ -5,7 +5,7 @@ import pytest
 
 from pip_validate import *
 
-NAME = __file__.split("/")[-1].split(".")[0].split("_")[-1]
+NAME = "pip_validate"
 
 is_import_test_lines = [
     ("from .a import b", True),
@@ -64,9 +64,9 @@ def test_collect_dir_imports():
             assert set(v) == set(["pip", "crayons"])
 
 def test_end_to_end_file():
-    assert subprocess.call("python toplevel.py --file toplevel.py --req requirements.txt", shell=True) == 0
+    assert subprocess.call("pip-validate --file pip_validate.py --req requirements.txt", shell=True) == 0
 
 
 def test_end_to_end_dir():
     # dev requirements are missing and this file imports pytest
-    assert subprocess.call("python toplevel.py --dir . --req requirements.txt", shell=True) == 1
+    assert subprocess.call("pip-validate --dir . --req requirements.txt", shell=True) == 1
