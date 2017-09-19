@@ -1,6 +1,6 @@
 **pip-validate**
 ---
-[![PyPI version](https://badge.fury.io/py/toplevel.svg)](https://badge.fury.io/py/toplevel) [![](https://travis-ci.org/Ohjeah/toplevel.svg)](https://travis-ci.org/Ohjeah/toplevel/) [![codecov](https://codecov.io/gh/Ohjeah/pip-validate/branch/master/graph/badge.svg)](https://codecov.io/gh/Ohjeah/pip-validate)
+[![PyPI version](https://badge.fury.io/py/pip-validate.svg)](https://badge.fury.io/py/pip-validate) [![](https://travis-ci.org/Ohjeah/pip-validate.svg)](https://travis-ci.org/Ohjeah/pip-validate/) [![codecov](https://codecov.io/gh/Ohjeah/pip-validate/branch/master/graph/badge.svg)](https://codecov.io/gh/Ohjeah/pip-validate)
 
 ### Installation
 

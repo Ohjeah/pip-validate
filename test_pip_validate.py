@@ -69,4 +69,4 @@ def test_end_to_end_file():
 
 def test_end_to_end_dir():
     # dev requirements are missing and this file imports pytest
-    assert subprocess.call("pip-validate --dir . --req requirements.txt", shell=True) == 1
+    assert subprocess.call("python pip_validate.py --dir . --req requirements.txt", shell=True) == 1
