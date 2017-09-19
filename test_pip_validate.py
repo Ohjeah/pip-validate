@@ -3,7 +3,7 @@ import subprocess
 
 import pytest
 
-from pip-validate import *
+from pip_validate import *
 
 NAME = __file__.split("/")[-1].split(".")[0].split("_")[-1]
 

@@ -59,7 +59,7 @@ setup(
     author=AUTHOR,
     author_email=EMAIL,
     url=URL,
-    py_modules=["pip-validate"],
+    py_modules=["pip_validate"],
     install_requires=REQUIRED,
     license="MIT",
     classifiers=[
@@ -72,7 +72,7 @@ setup(
     },
     entry_points={
             "console_scripts": [
-                "pip-validate = pip-validate:main"
+                "pip-validate = pip_validate:main"
             ]
         },
 )
