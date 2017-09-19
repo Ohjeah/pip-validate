@@ -3,7 +3,7 @@ import subprocess
 
 import pytest
 
-from toplevel import *
+from pip-validate import *
 
 NAME = __file__.split("/")[-1].split(".")[0].split("_")[-1]
 
@@ -58,7 +58,7 @@ def test_collect_dir_imports():
     for k, v in imports.items():
         if "setup.py" in k:
             assert v == ["setuptools"]
-        elif "test_toplevel.py" in k:
+        elif "test_" in k:
             assert v == ["pytest"]
         else:
             assert set(v) == set(["pip", "crayons"])

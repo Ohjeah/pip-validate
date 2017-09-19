@@ -5,7 +5,7 @@ from shutil import rmtree
 
 from setuptools import setup, Command
 
-NAME = "toplevel"
+NAME = "pip-validate"
 DESCRIPTION = "Validate toplevel imports against requirements.txt"
 URL = "https://github.com/ohjeah/toplevel"
 EMAIL = "info@markusqua.de"
@@ -59,7 +59,7 @@ setup(
     author=AUTHOR,
     author_email=EMAIL,
     url=URL,
-    py_modules=["toplevel"],
+    py_modules=["pip-validate"],
     install_requires=REQUIRED,
     license="MIT",
     classifiers=[
@@ -72,7 +72,7 @@ setup(
     },
     entry_points={
             "console_scripts": [
-                "toplevel = toplevel:main"
+                "pip-validate = pip-validate:main"
             ]
         },
 )
