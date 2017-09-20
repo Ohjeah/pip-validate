@@ -4,24 +4,57 @@ import re
 import sys
 import os
 import imp
-import dis
 
 import crayons
 from pip.req import parse_requirements
 from pip.commands import SearchCommand
 
-# import dis
-#
-# def find_toplevel_imports(filename):
-#     with open(filename, "r") as f:
-#         instructions = dis.get_instructions("".join(f.readlines()))
-#     return [i.argval.split(".")[0] for i in instructions if "IMPORT_NAME" in i.opname]
+
+def is_import(line):
+    """Does this line use the import keyword"""
+    pattern = r"[ \t]*import[ \t]+|[ \t]+import[ \t]+"
+    for token in ["'", '"']: # do we use import in a string
+        if token in line:
+            return False
+    return bool(re.findall(pattern, line))
+
+
+def clean_line(line):
+    """Find the toplevel module which is imported"""
+    pattern = r"(\.?\w+)?(\.?\w+)*[ ]?import[ ]?(\.?\w+)?"
+    groups = re.search(pattern, line.strip()).groups()
+    module = groups[0] if groups[0] is not None else groups[2]
+    if "." in module:
+        return None
+    else:
+        return module.strip()
+
+
+def ignore_docstrings_and_comments(lines):
+    """Only look at the acutal code when searching for imports"""
+    marker = None
+    for line in lines:
+
+        if marker is None:
+            l = line.split("'''")[0].split('"""')[0].split('#')[0]
+            if l:
+                yield l
+
+            if '"""' in line:
+                marker = '"""'
+            elif "'''" in line:
+                marker = "'''"
+
+        elif marker in line:
+            marker = None
 
 
 def find_toplevel_imports(filename):
     with open(filename, "r") as f:
-        instructions = dis.get_instructions("".join(f.readlines()))
-    return [i.argval.split(".")[0] for i in instructions if "IMPORT_NAME" in i.opname]
+        imports = (clean_line(line) for line in
+                   ignore_docstrings_and_comments(f.readlines())
+                   if is_import(line))
+    return set(filter(bool, imports))
 
 
 def _get_module_path(module_name):
@@ -47,25 +80,22 @@ def is_std_lib(module_name):
     return "python" in module_path or "lib" in module_path
 
 
-def is_in_cwd(module_name):
-    return module_name in [f.split(".py")[0] for f in os.listdir(os.getcwd())]
+def in_path(module_name, path="."):
+    return module_name in [f.split(".py")[0] for f in os.listdir(path)]
 
 
-def collect_extern_file_imports(fname):
+def collect_extern_file_imports(fname, path="."):
     imports = find_toplevel_imports(fname)
-    return [i for i in imports if not is_in_cwd(i) and not is_std_lib(i)]
+    return [i for i in imports if not in_path(i, path) and not is_std_lib(i)]
 
 
-def collect_dir_imports(dir):
+def collect_dir_imports(path):
     imports = {}
-    for root, dirs, files in os.walk(dir, topdown=False):
+    for root, dirs, files in os.walk(path, topdown=False):
         for f in [f for f in files if os.path.splitext(f)[1] == ".py"]:
             path_to_file = os.path.join(root, f)
-            imports[path_to_file] = collect_extern_file_imports(path_to_file)
+            imports[path_to_file] = collect_extern_file_imports(path_to_file, path)
     return imports
-
-
-
 
 
 def read_requirements(fname):
@@ -97,7 +127,7 @@ def match_to_alias(imports, requirements):
 def validate_imports(imports, requirements):
     valid = True
     not_in_req = [i for i in imports if i not in requirements]
-    unsed_req = [r for r in requirements if r in imports]
+    unsed_req = [r for r in requirements if r not in imports]
 
     if not_in_req and not unsed_req:
         valid = False
