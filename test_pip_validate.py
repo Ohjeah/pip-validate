@@ -36,6 +36,7 @@ def test_clean_line(line, result):
 def test_is_in_cwd():
     assert is_in_cwd(NAME)
 
+
 def test_is_std_lib():
     assert is_std_lib("sys")
     assert is_std_lib("os")

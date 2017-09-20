@@ -8,6 +8,13 @@ import imp
 import crayons
 from pip.req import parse_requirements
 
+# import dis
+#
+# def find_toplevel_imports(filename):
+#     with open(filename, "r") as f:
+#         instructions = dis.get_instructions("".join(f.readlines()))
+#     return [i.argval.split(".")[0] for i in instructions if "IMPORT_NAME" in i.opname]
+
 
 def is_import(line):
     """Does this line use the import keyword"""

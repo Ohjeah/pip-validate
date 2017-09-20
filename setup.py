@@ -10,7 +10,7 @@ DESCRIPTION = "Validate toplevel imports against requirements.txt"
 URL = "https://github.com/ohjeah/toplevel"
 EMAIL = "info@markusqua.de"
 AUTHOR = "Markus Quade"
-VERSION = "0.2.1"
+VERSION = "0.3.1"
 
 here = os.path.abspath(os.path.dirname(__file__))
 
