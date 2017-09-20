@@ -81,7 +81,7 @@ def is_std_lib(module_name):
 
 
 def in_path(module_name, path="."):
-    return module_name in [f.split(".py")[0] for f in os.listdir(path)]
+    return module_name in [f.split(".py")[0] for f in os.listdir(path)] or module_name == path
 
 
 def collect_extern_file_imports(fname, path="."):
