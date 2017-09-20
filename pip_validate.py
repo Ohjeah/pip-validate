@@ -8,6 +8,7 @@ import dis
 
 import crayons
 from pip.req import parse_requirements
+from pip.commands import SearchCommand
 
 # import dis
 #
@@ -64,13 +65,50 @@ def collect_dir_imports(dir):
     return imports
 
 
+
+
+
+def read_requirements(fname):
+    return [r.req.name for r in parse_requirements(fname, session="hack")]
+
+
+def find_alias_on_pypi(name):
+    search = SearchCommand()
+    options, query = search.parse_args([name])
+    hits = search.search(query, options)
+    return [hit["name"] for hit in hits]
+
+
+def match_to_alias(imports, requirements):
+    req = requirements[:]
+    aliases = {}
+    for import_ in imports:
+        hits = find_alias_on_pypi(import_)
+        for hit in hits:
+            if hit in req:
+                req.pop(req.index(hit))
+                aliases[import_] = hit
+                break
+        else:
+            aliases[import_] = None
+    return aliases
+
+
 def validate_imports(imports, requirements):
     valid = True
-    for i in imports:
-        if i not in requirements:
-            msg = "{} not listed in requirements.".format(i)
-            print(crayons.red(msg))
-            valid = False
+    not_in_req = [i for i in imports if i not in requirements]
+    unsed_req = [r for r in requirements if r in imports]
+
+    if not_in_req and not unsed_req:
+        valid = False
+
+    elif not_in_req:
+        aliases = match_to_alias(not_in_req, unsed_req)
+        for k, v in aliases.items():
+            if v is None:
+                msg = "{} not listed in requirements.".format(k)
+                print(crayons.red(msg))
+                valid = False
     return valid
 
 
@@ -79,7 +117,7 @@ def main():
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--file", default=None, help="single file")
     group.add_argument("--dir", default=None, help="directory")
-    parser.add_argument("--req", default=None, help="compare to requirements")
+    parser.add_argument("--req", nargs='*', help="compare to requirements")
     args = parser.parse_args()
 
     if args.file is not None:
@@ -88,9 +126,8 @@ def main():
         imports = set(itertools.chain.from_iterable(
                         collect_dir_imports(args.dir).values()))
 
-    if args.req is not None:
-        req = [r.req.name for r in
-               parse_requirements(args.req, session="hack")]
+    if args.req:
+        req = sum(map(read_requirements, args.req), [])
         all_valid = validate_imports(imports, req)
         if all_valid:
             msg = "All imports of {} are listed in {}".format(args.dir or args.file, args.req)
@@ -98,6 +135,9 @@ def main():
             sys.exit(0)
         else:
             sys.exit(1)
+    #else:
+    #    for i in imports:
+    #        print("Found:", i)
 
 
 if __name__ == '__main__':
