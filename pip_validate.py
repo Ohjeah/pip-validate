@@ -4,6 +4,7 @@ import re
 import sys
 import os
 import imp
+import dis
 
 import crayons
 from pip.req import parse_requirements
@@ -16,51 +17,10 @@ from pip.req import parse_requirements
 #     return [i.argval.split(".")[0] for i in instructions if "IMPORT_NAME" in i.opname]
 
 
-def is_import(line):
-    """Does this line use the import keyword"""
-    pattern = r"[ \t]*import[ \t]+|[ \t]+import[ \t]+"
-    for token in ["'", '"']: # do we use import in a string
-        if token in line:
-            return False
-    return bool(re.findall(pattern, line))
-
-
-def clean_line(line):
-    """Find the toplevel module which is imported"""
-    pattern = r"(\.?\w+)?(\.?\w+)*[ ]?import[ ]?(\.?\w+)?"
-    groups = re.search(pattern, line.strip()).groups()
-    module = groups[0] if groups[0] is not None else groups[2]
-    if "." in module:
-        return None
-    else:
-        return module.strip()
-
-
-def ignore_docstrings_and_comments(lines):
-    """Only look at the acutal code when searching for imports"""
-    marker = None
-    for line in lines:
-
-        if marker is None:
-            l = line.split("'''")[0].split('"""')[0].split('#')[0]
-            if l:
-                yield l
-
-            if '"""' in line:
-                marker = '"""'
-            elif "'''" in line:
-                marker = "'''"
-
-        elif marker in line:
-            marker = None
-
-
 def find_toplevel_imports(filename):
     with open(filename, "r") as f:
-        imports = (clean_line(line) for line in
-                   ignore_docstrings_and_comments(f.readlines())
-                   if is_import(line))
-    return set(filter(bool, imports))
+        instructions = dis.get_instructions("".join(f.readlines()))
+    return [i.argval.split(".")[0] for i in instructions if "IMPORT_NAME" in i.opname]
 
 
 def _get_module_path(module_name):
