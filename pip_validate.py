@@ -84,9 +84,13 @@ def in_path(module_name, path="."):
     return module_name in [f.split(".py")[0] for f in os.listdir(path)] or module_name == path
 
 
+def is_relative_import(module_name):
+    return module_name.startswith(".")
+
+
 def collect_extern_file_imports(fname, path="."):
     imports = find_toplevel_imports(fname)
-    return [i for i in imports if not in_path(i, path) and not is_std_lib(i)]
+    return [i for i in imports if not in_path(i, path) and not is_std_lib(i) and not is_relative_import(i)]
 
 
 def collect_dir_imports(path):

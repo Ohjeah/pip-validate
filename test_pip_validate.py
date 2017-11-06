@@ -37,6 +37,10 @@ def test_ignore_docstrings_and_comments():
     assert text_wo_doc == list(ignore_docstrings_and_comments(text))
 
 
+def test_is_relative_import():
+    assert is_relative_import(".version")
+    assert not is_relative_import("version")
+
 def test_in_path():
     assert in_path("pip_validate", ".")
 
