@@ -169,9 +169,9 @@ def main():
             sys.exit(0)
         else:
             sys.exit(1)
-    #else:
-    #    for i in imports:
-    #        print("Found:", i)
+    else:
+        for i in imports:
+            print("Found:", i)
 
 
 if __name__ == '__main__':
