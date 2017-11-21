@@ -8,6 +8,6 @@
 
 ### Usage
 
-`pip-validate --file toplevel.py --reg requirements.txt`
+`pip-validate --file pip_validate.py --reg requirements.txt`
 
 You can either use `--file` to check a single file or `--dir` to check a module.
