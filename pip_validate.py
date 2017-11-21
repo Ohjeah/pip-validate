@@ -169,9 +169,10 @@ def main():
             sys.exit(0)
         else:
             sys.exit(1)
-    else:
+    else
+        print("Found:")
         for i in imports:
-            print("Found:", i)
+            print(i)
 
 
 if __name__ == '__main__':
