@@ -4,57 +4,35 @@ import re
 import sys
 import os
 import imp
+import ast
 
 import crayons
 from pip.req import parse_requirements
 from pip.commands import SearchCommand
 
 
-def is_import(line):
-    """Does this line use the import keyword"""
-    pattern = r"[ \t]*import[ \t]+|[ \t]+import[ \t]+"
-    for token in ["'", '"']: # do we use import in a string
-        if token in line:
-            return False
-    return bool(re.findall(pattern, line))
+class ImportVisitor(ast.NodeVisitor):
+    def __init__(self):
+        self.imports = set()
 
+    def add_import(self, module):
+        self.imports.add(module.split(".")[0])
 
-def clean_line(line):
-    """Find the toplevel module which is imported"""
-    pattern = r"(\.?\w+)?(\.?\w+)*[ ]?import[ ]?(\.?\w+)?"
-    groups = re.search(pattern, line.strip()).groups()
-    module = groups[0] if groups[0] is not None else groups[2]
-    if "." in module:
-        return None
-    else:
-        return module.strip()
+    def visit_Import(self, node):
+        module = node.names[0].name
+        self.add_import(module)
 
-
-def ignore_docstrings_and_comments(lines):
-    """Only look at the acutal code when searching for imports"""
-    marker = None
-    for line in lines:
-
-        if marker is None:
-            l = line.split("'''")[0].split('"""')[0].split('#')[0]
-            if l:
-                yield l
-
-            if '"""' in line:
-                marker = '"""'
-            elif "'''" in line:
-                marker = "'''"
-
-        elif marker in line:
-            marker = None
+    def visit_ImportFrom(self, node):
+        if node.level == 0: # everything else is relative import
+            self.add_import(node.module)
 
 
 def find_toplevel_imports(filename):
-    with open(filename, "r") as f:
-        imports = (clean_line(line) for line in
-                   ignore_docstrings_and_comments(f.readlines())
-                   if is_import(line))
-    return set(filter(bool, imports))
+    with open(filename, "rb") as f:
+        tree = ast.parse(f.read())
+    visitor = ImportVisitor()
+    visitor.visit(tree)
+    return visitor.imports
 
 
 def _get_module_path(module_name):
@@ -84,13 +62,9 @@ def in_path(module_name, path="."):
     return module_name in [f.split(".py")[0] for f in os.listdir(path)] or module_name == path
 
 
-def is_relative_import(module_name):
-    return module_name.startswith(".")
-
-
 def collect_extern_file_imports(fname, path="."):
     imports = find_toplevel_imports(fname)
-    return [i for i in imports if not in_path(i, path) and not is_std_lib(i) and not is_relative_import(i)]
+    return [i for i in imports if not in_path(i, path) and not is_std_lib(i)]
 
 
 def collect_dir_imports(path):

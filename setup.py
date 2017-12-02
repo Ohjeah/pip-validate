@@ -7,10 +7,10 @@ from setuptools import setup, Command
 
 NAME = "pip-validate"
 DESCRIPTION = "Validate toplevel imports against requirements.txt"
-URL = "https://github.com/ohjeah/toplevel"
+URL = "https://github.com/ohjeah/pip-validate"
 EMAIL = "info@markusqua.de"
 AUTHOR = "Markus Quade"
-VERSION = "0.5.1"
+VERSION = "0.6.0"
 
 here = os.path.abspath(os.path.dirname(__file__))
 
