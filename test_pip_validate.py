@@ -39,6 +39,7 @@ def test_in_path():
 def test_is_std_lib():
     assert is_std_lib("sys")
     assert is_std_lib("os")
+    assert not is_std_lib("")
     assert not is_std_lib("apps")
     assert not is_std_lib("..apps")
 

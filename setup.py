@@ -10,7 +10,7 @@ DESCRIPTION = "Validate toplevel imports against requirements.txt"
 URL = "https://github.com/ohjeah/pip-validate"
 EMAIL = "info@markusqua.de"
 AUTHOR = "Markus Quade"
-VERSION = "0.6.0"
+VERSION = "1.0.0"
 
 here = os.path.abspath(os.path.dirname(__file__))
 
