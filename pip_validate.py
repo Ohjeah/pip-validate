@@ -1,6 +1,5 @@
 import argparse
 import itertools
-import re
 import sys
 import os
 import imp
@@ -63,7 +62,8 @@ def is_std_lib(module_name):
 
 
 def in_path(module_name, path="."):
-    return module_name in [f.split(".py")[0] for f in os.listdir(path)] or module_name == path
+    npath = os.path.basename(os.path.normpath(path))
+    return module_name in [f.split(".py")[0] for f in os.listdir(path)] or module_name == npath
 
 
 def collect_extern_file_imports(fname, path="."):
@@ -73,6 +73,7 @@ def collect_extern_file_imports(fname, path="."):
 
 def collect_dir_imports(path):
     imports = {}
+
     for root, dirs, files in os.walk(path, topdown=False):
         for f in [f for f in files if os.path.splitext(f)[1] == ".py"]:
             path_to_file = os.path.join(root, f)
@@ -88,11 +89,11 @@ def find_alias_on_pypi(name):
     search = SearchCommand()
     options, query = search.parse_args([name])
     hits = search.search(query, options)
-    return [hit["name"] for hit in hits]
+    return [hit["name"].lower() for hit in hits]
 
 
 def match_to_alias(imports, requirements):
-    req = requirements
+    req = requirements[:]
     aliases = {}
     for import_ in imports:
         hits = find_alias_on_pypi(import_)
@@ -103,7 +104,7 @@ def match_to_alias(imports, requirements):
                 break
         else:
             aliases[import_] = None
-    return aliases, requirements
+    return aliases, req
 
 
 def validate_imports(imports, requirements):

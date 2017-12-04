@@ -34,6 +34,7 @@ def test_ImportVisitor(case, result):
 
 def test_in_path():
     assert in_path("pip_validate", ".")
+    assert not in_path("pip_validate", "..")
 
 
 def test_is_std_lib():
@@ -57,9 +58,11 @@ def is_connected():
 
 @pytest.mark.skipif(not is_connected(), reason="Need an internet connection")
 def test_match_to_alias():
-    imports = ["dateutil"]
-    requirements = ["python-dateutil"]
+    imports = ["dateutil", "yaml"]
+    requirements = ["python-dateutil", "pyyaml"]
     aliases, unsed_req = match_to_alias(imports, requirements)
+    print(requirements)
+    print(aliases)
     for i, r in zip(imports, requirements):
         assert aliases[i] == r
     assert unsed_req == []
