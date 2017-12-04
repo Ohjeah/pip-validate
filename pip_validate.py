@@ -92,7 +92,7 @@ def find_alias_on_pypi(name):
 
 
 def match_to_alias(imports, requirements):
-    req = requirements[:]
+    req = requirements
     aliases = {}
     for import_ in imports:
         hits = find_alias_on_pypi(import_)
@@ -103,7 +103,7 @@ def match_to_alias(imports, requirements):
                 break
         else:
             aliases[import_] = None
-    return aliases
+    return aliases, requirements
 
 
 def validate_imports(imports, requirements):
@@ -115,13 +115,22 @@ def validate_imports(imports, requirements):
         valid = False
 
     elif not_in_req:
-        aliases = match_to_alias(not_in_req, unsed_req)
+        aliases, unsed_req = match_to_alias(not_in_req, unsed_req)
         for k, v in aliases.items():
             if v is None:
                 msg = "{} not listed in requirements.".format(k)
                 print(crayons.red(msg))
                 valid = False
+    if unsed_req:
+        print(crayons.yellow("Some requirements are potentially unused:\n"))
+        print_modules(unsed_req, crayons.yellow, pad="\n")
     return valid
+
+
+def print_modules(modules, color=None, pad=""): # pragma: no cover
+    color = color or (lambda x: x)
+    for m in sorted(modules):
+        print(color(pad+m))
 
 
 def main():
@@ -147,10 +156,9 @@ def main():
             sys.exit(0)
         else:
             sys.exit(1)
-    else:
+    else:   # pragma: no cover
         print("Found:")
-        for i in imports:
-            print(i)
+        print_modules(imports)
 
 
 if __name__ == '__main__':

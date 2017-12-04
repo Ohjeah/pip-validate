@@ -29,7 +29,7 @@ def test_ImportVisitor(case, result):
     tree = ast.parse(case)
     visitor = ImportVisitor()
     visitor.visit(tree)
-    assert set(result) == visitor.non_relative_imports
+    assert sorted(result) == visitor.non_relative_imports
 
 
 def test_in_path():
@@ -58,9 +58,10 @@ def is_connected():
 def test_match_to_alias():
     imports = ["dateutil"]
     requirements = ["python-dateutil"]
-    aliases = match_to_alias(imports, requirements)
+    aliases, unsed_req = match_to_alias(imports, requirements)
     for i, r in zip(imports, requirements):
         assert aliases[i] == r
+    assert unsed_req == []
 
 
 @pytest.mark.skipif(not is_connected(), reason="Need an internet connection")
@@ -91,8 +92,6 @@ def test_collect_dir_imports():
 
 
 def test_end_to_end_file():
-    out = b"Found:\ncrayons\npip\n"
-    assert out == subprocess.check_output("pip-validate --file pip_validate.py", shell=True)
     assert subprocess.call("pip-validate --file pip_validate.py --req requirements.txt", shell=True) == 0
 
 
