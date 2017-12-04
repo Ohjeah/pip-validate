@@ -13,10 +13,10 @@ from pip.commands import SearchCommand
 
 class ImportVisitor(ast.NodeVisitor):
     def __init__(self):
-        self.imports = set()
+        self._non_relative_imports = set()
 
     def add_import(self, module):
-        self.imports.add(module.split(".")[0])
+        self._non_relative_imports.add(module.split(".")[0])
 
     def visit_Import(self, node):
         module = node.names[0].name
@@ -26,13 +26,17 @@ class ImportVisitor(ast.NodeVisitor):
         if node.level == 0: # everything else is relative import
             self.add_import(node.module)
 
+    @property
+    def non_relative_imports(self):
+        return sorted(self._non_relative_imports)
+
 
 def find_toplevel_imports(filename):
     with open(filename, "rb") as f:
         tree = ast.parse(f.read())
     visitor = ImportVisitor()
     visitor.visit(tree)
-    return visitor.imports
+    return visitor.non_relative_imports
 
 
 def _get_module_path(module_name):

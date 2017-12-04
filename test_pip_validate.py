@@ -6,22 +6,30 @@ import pytest
 
 from pip_validate import *
 
-is_import_test_lines = [
-    ("from .a import b", False),
-    ("from a import b", True),
-    ("import a as b", True),
-    ("import a.b", True),
-    ("is_import(a)", False),
-    ('"All imports of {} are listed in {}".format(args.dir or args.file, args.req)', False)
+
+import_test_cases = [
+    ("import a", ("a",)),
+    ("import a.b", ("a",)),
+    ("""def f(a):
+        import a as b
+    """, ("a",)),
+    ("""class A:
+        class B:
+            def __init__(self):
+                import c
+        def __init__(self):
+            self.b = B()
+    """, ("c",)),
+    ("#a comment", ()),
 ]
 
 
-@pytest.mark.parametrize(["line", "result"],  is_import_test_lines)
-def test_ImportVisitor(line, result):
-    tree = ast.parse(line)
+@pytest.mark.parametrize(["case", "result"],  import_test_cases)
+def test_ImportVisitor(case, result):
+    tree = ast.parse(case)
     visitor = ImportVisitor()
     visitor.visit(tree)
-    assert result == bool(len(visitor.imports))
+    assert set(result) == visitor.non_relative_imports
 
 
 def test_in_path():
@@ -32,7 +40,7 @@ def test_is_std_lib():
     assert is_std_lib("sys")
     assert is_std_lib("os")
     assert not is_std_lib("apps")
-    assert not is_std_lib("")
+    assert not is_std_lib("..apps")
 
 
 def is_connected():
@@ -53,6 +61,7 @@ def test_match_to_alias():
     aliases = match_to_alias(imports, requirements)
     for i, r in zip(imports, requirements):
         assert aliases[i] == r
+
 
 @pytest.mark.skipif(not is_connected(), reason="Need an internet connection")
 def test_validate_imports_alias():
@@ -82,6 +91,8 @@ def test_collect_dir_imports():
 
 
 def test_end_to_end_file():
+    out = b"Found:\ncrayons\npip\n"
+    assert out == subprocess.check_output("pip-validate --file pip_validate.py", shell=True)
     assert subprocess.call("pip-validate --file pip_validate.py --req requirements.txt", shell=True) == 0
 
 
