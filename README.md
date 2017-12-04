@@ -11,3 +11,9 @@
 `pip-validate --file pip_validate.py --reg requirements.txt`
 
 You can either use `--file` to check a single file or `--dir` to check a module.
+
+### How does it work
+
+Python files are parsed for import and import from statements. (other ways to import modules, e.g. using `__import__()` are not considered).
+
+Found _external_ imports and entries in your `requirements.txt` file will be matched. If PyPI name and module name differ, e.g. `delegator.py` and `delegator`, `pip-search` is used to resolve aliases.
