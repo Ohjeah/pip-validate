@@ -6,8 +6,12 @@ import imp
 import ast
 
 import crayons
-from pip.req import parse_requirements
-from pip.commands import SearchCommand
+try:
+    from pip.req import parse_requirements
+    from pip.commands import SearchCommand
+except ModuleNotFoundError:
+    from pip._internal.req import parse_requirements
+    from pip._internal.commands import SearchCommand
 
 
 class ImportVisitor(ast.NodeVisitor):
