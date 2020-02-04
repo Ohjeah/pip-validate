@@ -1,2 +1,2 @@
-pip
+pip>=20
 crayons

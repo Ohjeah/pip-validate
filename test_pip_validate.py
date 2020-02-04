@@ -65,8 +65,8 @@ def is_connected():
 
 @pytest.mark.skipif(not is_connected(), reason="Need an internet connection")
 def test_match_to_alias():
-    imports = ["dateutil", "yaml"]
-    requirements = ["python-dateutil", "pyyaml"]
+    imports = ["dateutil"]
+    requirements = ["python-dateutil"]
     aliases, unsed_req = match_to_alias(imports, requirements)
     print(requirements)
     print(aliases)

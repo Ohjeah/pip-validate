@@ -7,12 +7,8 @@ import ast
 
 import crayons
 
-try:
-    from pip.req import parse_requirements
-    from pip.commands import SearchCommand
-except ModuleNotFoundError:
-    from pip._internal.req import parse_requirements
-    from pip._internal.commands import SearchCommand
+from pip._internal.req import parse_requirements
+from pip._internal.commands.search import SearchCommand
 
 
 class ImportVisitor(ast.NodeVisitor):
@@ -94,9 +90,10 @@ def read_requirements(fname):
 
 
 def find_alias_on_pypi(name):
-    search = SearchCommand()
+    search = SearchCommand("search", "")
     options, query = search.parse_args([name])
-    hits = search.search(query, options)
+    with search.main_context():
+        hits = search.search(query, options)
     return [hit["name"].lower() for hit in hits]
 
 
