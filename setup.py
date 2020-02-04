@@ -67,12 +67,6 @@ setup(
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
     ],
-    cmdclass={
-        "publish": PublishCommand,
-    },
-    entry_points={
-            "console_scripts": [
-                "pip-validate = pip_validate:main"
-            ]
-        },
+    cmdclass={"publish": PublishCommand,},
+    entry_points={"console_scripts": ["pip-validate = pip_validate:main"]},
 )

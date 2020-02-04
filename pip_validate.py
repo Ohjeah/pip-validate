@@ -6,6 +6,7 @@ import imp
 import ast
 
 import crayons
+
 try:
     from pip.req import parse_requirements
     from pip.commands import SearchCommand
@@ -26,7 +27,7 @@ class ImportVisitor(ast.NodeVisitor):
         self.add_import(module)
 
     def visit_ImportFrom(self, node):
-        if node.level == 0: # everything else is relative import
+        if node.level == 0:  # everything else is relative import
             self.add_import(node.module)
 
     @property
@@ -49,7 +50,7 @@ def _get_module_path(module_name):
     try:
         return imp.find_module(module_name, paths)[1]
     except ImportError:
-        return ''
+        return ""
 
 
 def is_std_lib(module_name):
@@ -67,7 +68,10 @@ def is_std_lib(module_name):
 
 def in_path(module_name, path="."):
     npath = os.path.basename(os.path.normpath(path))
-    return module_name in [f.split(".py")[0] for f in os.listdir(path)] or module_name == npath
+    return (
+        module_name in [f.split(".py")[0] for f in os.listdir(path)]
+        or module_name == npath
+    )
 
 
 def collect_extern_file_imports(fname, path="."):
@@ -132,10 +136,10 @@ def validate_imports(imports, requirements):
     return valid
 
 
-def print_modules(modules, color=None, pad=""): # pragma: no cover
+def print_modules(modules, color=None, pad=""):  # pragma: no cover
     color = color or (lambda x: x)
     for m in sorted(modules):
-        print(color(pad+m))
+        print(color(pad + m))
 
 
 def main():
@@ -143,28 +147,31 @@ def main():
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--file", default=None, help="single file")
     group.add_argument("--dir", default=None, help="directory")
-    parser.add_argument("--req", nargs='*', help="compare to requirements")
+    parser.add_argument("--req", nargs="*", help="compare to requirements")
     args = parser.parse_args()
 
     if args.file is not None:
         imports = set(collect_extern_file_imports(args.file))
     else:
-        imports = set(itertools.chain.from_iterable(
-                        collect_dir_imports(args.dir).values()))
+        imports = set(
+            itertools.chain.from_iterable(collect_dir_imports(args.dir).values())
+        )
 
     if args.req:
         req = sum(map(read_requirements, args.req), [])
         all_valid = validate_imports(imports, req)
         if all_valid:
-            msg = "All imports of {} are listed in {}".format(args.dir or args.file, args.req)
+            msg = "All imports of {} are listed in {}".format(
+                args.dir or args.file, args.req
+            )
             print(crayons.green(msg))
             sys.exit(0)
         else:
             sys.exit(1)
-    else:   # pragma: no cover
+    else:  # pragma: no cover
         print("Found:")
         print_modules(imports)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

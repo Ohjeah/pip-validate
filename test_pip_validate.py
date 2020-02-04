@@ -10,21 +10,27 @@ from pip_validate import *
 import_test_cases = [
     ("import a", ("a",)),
     ("import a.b", ("a",)),
-    ("""def f(a):
+    (
+        """def f(a):
         import a as b
-    """, ("a",)),
-    ("""class A:
+    """,
+        ("a",),
+    ),
+    (
+        """class A:
         class B:
             def __init__(self):
                 import c
         def __init__(self):
             self.b = B()
-    """, ("c",)),
+    """,
+        ("c",),
+    ),
     ("#a comment", ()),
 ]
 
 
-@pytest.mark.parametrize(["case", "result"],  import_test_cases)
+@pytest.mark.parametrize(["case", "result"], import_test_cases)
 def test_ImportVisitor(case, result):
     tree = ast.parse(case)
     visitor = ImportVisitor()
@@ -47,6 +53,7 @@ def test_is_std_lib():
 
 def is_connected():
     import socket
+
     try:
         host = socket.gethostbyname("www.google.com")
         socket.create_connection((host, 80), 2)
@@ -77,10 +84,13 @@ def test_validate_imports_alias():
 def test_validate_imports():
     assert validate_imports(["a", "b", "c"], ["a", "b", "c"])
 
+
 # self-test
 @pytest.mark.skipif(not is_connected(), reason="Need an internet connection")
 def test_collect_extern_file_imports():
-    assert set(collect_extern_file_imports("pip_validate.py")) == set(["pip", "crayons"])
+    assert set(collect_extern_file_imports("pip_validate.py")) == set(
+        ["pip", "crayons"]
+    )
 
 
 @pytest.mark.skipif(not is_connected(), reason="Need an internet connection")
@@ -96,10 +106,20 @@ def test_collect_dir_imports():
 
 
 def test_end_to_end_file():
-    assert subprocess.call("pip-validate --file pip_validate.py --req requirements.txt", shell=True) == 0
+    assert (
+        subprocess.call(
+            "pip-validate --file pip_validate.py --req requirements.txt", shell=True
+        )
+        == 0
+    )
 
 
 @pytest.mark.skipif(not is_connected(), reason="Need an internet connection")
 def test_end_to_end_dir():
     # dev requirements are missing and this file imports pytest
-    assert subprocess.call("python pip_validate.py --dir . --req requirements.txt", shell=True) == 1
+    assert (
+        subprocess.call(
+            "python pip_validate.py --dir . --req requirements.txt", shell=True
+        )
+        == 1
+    )
